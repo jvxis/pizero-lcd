@@ -56,7 +56,8 @@ def display_info(title, info):
     draw = ImageDraw.Draw(image)
     
     # Display title with background rectangle
-    title_width = font_large.getsize(title)[0]
+    title_bbox = font_large.getbbox(title)
+    title_width = title_bbox[2] - title_bbox[0]
     draw.rectangle([(10, 10), (230, 40)], fill="BLUE")
     draw.text(((240 - title_width) // 2, 10), title, font=font_large, fill="WHITE")
     
