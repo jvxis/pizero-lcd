@@ -58,7 +58,7 @@ def display_info(title, info):
     # Display title with background rectangle
     title_bbox = font_large.getbbox(title)
     title_width = title_bbox[2] - title_bbox[0]
-    draw.rectangle([(10, 10), (230, 40)], fill="BLUE")
+    draw.rectangle([(10, 10), (230, 40)], fill="ORANGE")
     draw.text(((240 - title_width) // 2, 10), title, font=font_large, fill="WHITE")
     
     # Display information
@@ -79,7 +79,10 @@ def display_info(title, info):
             color = "LIGHTGREEN" if value == "True" else "RED" if value == "False" else "WHITE"
         elif "Sync %:" in line:
             value = line.split(":")[1].strip()
-            color = "LIGHTGREEN" if value == "100" else "YELLOW"
+            color = "LIGHTGREEN" if value == "100.00%" else "YELLOW"
+        elif "Inactive Channels:" in line:
+            value = line.split(":")[1].strip()
+            color = "WHITE" if value == "0" else "YELLOW"
         draw.text((10, y_position), line, font=font_small, fill=color)
         y_position += 20
     
@@ -104,8 +107,8 @@ def get_lnd_info():
         f"Version: {data['node_lnd_version']}\n"
         f"Synced to Chain: {data['synced_to_chain']}\n"
         f"Synced to Graph: {data['synced_to_graph']}\n"
-        f"Num. of Channels: {data['number_of_channels']}\n"
-        f"Num. of Inactive Channels: {data['num_inactive_channels']}\n"
+        f"Channels: {data['number_of_channels']}\n"
+        f"Inactive Channels: {data['num_inactive_channels']}\n"
         f"$ Total: {data['total_balance']:.2f} sats\n"
         f"$ Wallet: {data['wallet_balance']:.2f} sats\n"
         f"$ Channel: {data['channel_balance']:.2f} sats\n"
