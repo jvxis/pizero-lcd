@@ -92,13 +92,13 @@ def display_info(title, info):
 def get_bitcoin_info():
     bitcoin_info = (
         f"Version: {data['subversion']}\n"
-        f"Sync %: {100 if data['sync_percentage'] > 99.99 else data['sync_percentage']:.2f}%\n"
+        f"Sync %:       {100 if data['sync_percentage'] > 99.99 else data['sync_percentage']:.2f}%\n"
         f"Block Height: {data['current_block_height']}\n"
-        f"Chain:    {data['chain']}\n"
-        f"Pruned:   {data['pruned']}\n"
-        f"Fastest Fee:      {data['fastestFee']} sat/vB\n"
-        f"Half Hour Fee:    {data['halfHourFee']} sat/vB\n"
-        f"Hour Fee:         {data['hourFee']} sat/vB\n"
+        f"Chain:  {data['chain']}\n"
+        f"Pruned: {data['pruned']}\n"
+        f"Fastest Fee:   {data['fastestFee']} sat/vB\n"
+        f"Half Hour Fee: {data['halfHourFee']} sat/vB\n"
+        f"Hour Fee:      {data['hourFee']} sat/vB\n"
     )
     return "Bitcoin Info", bitcoin_info
 
@@ -107,10 +107,10 @@ def get_lnd_info():
         f"Version: {data['node_lnd_version']}\n"
         f"Synced to Chain: {data['synced_to_chain']}\n"
         f"Synced to Graph: {data['synced_to_graph']}\n"
-        f"Channels: {data['number_of_channels']}\n"
+        f"Channels:          {data['number_of_channels']}\n"
         f"Inactive Channels: {data['num_inactive_channels']}\n"
-        f"$ Total: {data['total_balance']:.2f} sats\n"
-        f"$ Wallet: {data['wallet_balance']:.2f} sats\n"
+        f"$ Total:   {data['total_balance']:.2f} sats\n"
+        f"$ Wallet:  {data['wallet_balance']:.2f} sats\n"
         f"$ Channel: {data['channel_balance']:.2f} sats\n"
     )
     return "LND Info", lnd_info
