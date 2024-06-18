@@ -24,7 +24,8 @@ font_small = ImageFont.truetype("Font/NotoSans-Regular.ttf", size=18)
 
 # Calculate node_alias width
 node_alias = data['node_alias']
-node_alias_width = font_large.getsize(node_alias)[0]
+node_alias_bbox = font_large.getbbox(node_alias)
+node_alias_width = node_alias_bbox[2] - node_alias_bbox[0]
 
 # Center coordinates for node_alias
 node_alias_x = (240 - node_alias_width) // 2
