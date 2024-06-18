@@ -19,8 +19,8 @@ response = requests.get(url)
 data = response.json()
 
 # Define fonts
-font_large = ImageFont.truetype("Font/Font02.ttf", size=24)
-font_small = ImageFont.truetype("Font/Font02.ttf", size=18)
+font_large = ImageFont.truetype("Font/NotoSans-Regular.ttf", size=24)
+font_small = ImageFont.truetype("Font/NotoSans-Regular.ttf", size=18)
 
 # Calculate node_alias width
 node_alias = data['node_alias']
