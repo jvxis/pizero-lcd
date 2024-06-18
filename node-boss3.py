@@ -67,22 +67,20 @@ def display_info(title, info):
     # Display information
     y_position = 50
     for line in info.split('\n'):
-        parts = line.split(':', 1)  # Split into two parts, limit split to 1 time
-        if len(parts) == 2:
-            label, value = parts
-            value = value.strip()
-            color = "WHITE"
-            if "Pruned" in label:
-                color = "LIGHTGREEN" if value.strip() == "True" else "RED" if value.strip() == "False" else "WHITE"
-            elif "Synced to Chain" in label:
-                color = "LIGHTGREEN" if value.strip() == "True" else "RED" if value.strip() == "False" else "WHITE"
-            elif "Synced to Graph" in label:
-                color = "LIGHTGREEN" if value.strip() == "True" else "RED" if value.strip() == "False" else "WHITE"
-        
-            draw.text((10, y_position), f"{label}:", font=font_small, fill="WHITE")
-            draw.text((150, y_position), value.strip(), font=font_small, fill=color)
-        else:
-            draw.text((10, y_position), line, font=font_small, fill="WHITE")
+        color = "WHITE"
+        if "Pruned:" in line:
+            value = line.split(":")[1].strip()
+            color = "LIGHTGREEN" if value == "True" else "RED" if value == "False" else "WHITE"
+        elif "Synced to Chain:" in line:
+            value = line.split(":")[1].strip()
+            color = "LIGHTGREEN" if value == "True" else "RED" if value == "False" else "WHITE"
+        elif "Synced to Graph:" in line:
+            value = line.split(":")[1].strip()
+            color = "LIGHTGREEN" if value == "True" else "RED" if value == "False" else "WHITE"
+        elif "Sync %:" in line:
+            value = line.split(":")[1].strip()
+            color = "LIGHTGREEN" if value == "100" else "YELLOW"
+        draw.text((10, y_position), line, font=font_small, fill=color)
         y_position += 20
     
     # Update display
@@ -93,11 +91,11 @@ def get_bitcoin_info():
         f"Version: {data['subversion']}\n"
         f"Sync %: {100 if data['sync_percentage'] > 99.99 else data['sync_percentage']:.2f}%\n"
         f"Block Height: {data['current_block_height']}\n"
-        f"Chain: {data['chain']}\n"
-        f"Pruned: {data['pruned']}\n"
-        f"Fastest Fee: {data['fastestFee']} sat/vB\n"
-        f"Half Hour Fee: {data['halfHourFee']} sat/vB\n"
-        f"Hour Fee: {data['hourFee']} sat/vB\n"
+        f"Chain:    {data['chain']}\n"
+        f"Pruned:   {data['pruned']}\n"
+        f"Fastest Fee:      {data['fastestFee']} sat/vB\n"
+        f"Half Hour Fee:    {data['halfHourFee']} sat/vB\n"
+        f"Hour Fee:         {data['hourFee']} sat/vB\n"
     )
     return "Bitcoin Info", bitcoin_info
 
@@ -108,9 +106,9 @@ def get_lnd_info():
         f"Synced to Graph: {data['synced_to_graph']}\n"
         f"Num. of Channels: {data['number_of_channels']}\n"
         f"Num. of Inactive Channels: {data['num_inactive_channels']}\n"
-        f"🪙 Total: {data['total_balance']:.2f} sats\n"
-        f"🪙 Wallet: {data['wallet_balance']:.2f} sats\n"
-        f"🪙 Channel: {data['channel_balance']:.2f} sats\n"
+        f"$ Total: {data['total_balance']:.2f} sats\n"
+        f"$ Wallet: {data['wallet_balance']:.2f} sats\n"
+        f"$ Channel: {data['channel_balance']:.2f} sats\n"
     )
     return "LND Info", lnd_info
 
