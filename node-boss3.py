@@ -62,16 +62,32 @@ def display_info(title, info):
     draw.text(((240 - title_width) // 2, 10), title, font=font_large, fill="WHITE")
     
     # Display information
-    draw.text((10, 50), info, font=font_small, fill="WHITE")
+    #draw.text((10, 50), info, font=font_small, fill="WHITE")
+    
+    # Display information
+    y_position = 50
+    for line in info.split('\n'):
+        color = "WHITE"
+        if "Pruned:" in line:
+            value = line.split(":")[1].strip()
+            color = "GREEN" if value == "True" else "RED" if value == "False" else "WHITE"
+        elif "Synced to Chain:" in line:
+            value = line.split(":")[1].strip()
+            color = "GREEN" if value == "True" else "RED" if value == "False" else "WHITE"
+        elif "Synced to Graph:" in line:
+            value = line.split(":")[1].strip()
+            color = "GREEN" if value == "True" else "RED" if value == "False" else "WHITE"
+        draw.text((10, y_position), line, font=font_small, fill=color)
+        y_position += 20
     
     # Update display
     disp.ShowImage(image)
 
 def get_bitcoin_info():
     bitcoin_info = (
-        f"Subversion: {data['subversion']}\n"
-        f"Sync Percentage: {100 if data['sync_percentage'] > 99.99 else data['sync_percentage']:.2f}%\n"
-        f"Current Block Height: {data['current_block_height']}\n"
+        f"Version: {data['subversion']}\n"
+        f"Sync %: {100 if data['sync_percentage'] > 99.99 else data['sync_percentage']:.2f}%\n"
+        f"Block Height: {data['current_block_height']}\n"
         f"Chain: {data['chain']}\n"
         f"Pruned: {data['pruned']}\n"
         f"Fastest Fee: {data['fastestFee']} sat/vB\n"
@@ -82,11 +98,11 @@ def get_bitcoin_info():
 
 def get_lnd_info():
     lnd_info = (
-        f"Node LND Version: {data['node_lnd_version']}\n"
+        f"Version: {data['node_lnd_version']}\n"
         f"Synced to Chain: {data['synced_to_chain']}\n"
         f"Synced to Graph: {data['synced_to_graph']}\n"
-        f"Number of Channels: {data['number_of_channels']}\n"
-        f"Number of Inactive Channels: {data['num_inactive_channels']}\n"
+        f"Num. of Channels: {data['number_of_channels']}\n"
+        f"Num. of Inactive Channels: {data['num_inactive_channels']}\n"
         f"Total Balance: {data['total_balance']:.2f} sats\n"
         f"Wallet Balance: {data['wallet_balance']:.2f} sats\n"
         f"Channel Balance: {data['channel_balance']:.2f} sats\n"
