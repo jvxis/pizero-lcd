@@ -69,8 +69,9 @@ while True:
             draw.rectangle([(0, 0), (240, 240)], fill="BLACK")
             draw.text((10, 10), bitcoin_info, font=font_small, fill="WHITE")
             disp.ShowImage(image)
-            time.sleep(10)
-            break
+            while True:
+                if disp.digital_read(disp.GPIO_KEY3_PIN) != 0:
+                    break
         
         elif disp.digital_read(disp.GPIO_KEY2_PIN) != 0:
             # Key 2 pressed: Show LND info
@@ -88,8 +89,9 @@ while True:
             draw.rectangle([(0, 0), (240, 240)], fill="BLACK")
             draw.text((10, 10), lnd_info, font=font_small, fill="WHITE")
             disp.ShowImage(image)
-            time.sleep(10)
-            break
+            while True:
+                if disp.digital_read(disp.GPIO_KEY3_PIN) != 0:
+                    break
         
         elif disp.digital_read(disp.GPIO_KEY3_PIN) != 0:
             # Key 3 pressed: Exit the application
