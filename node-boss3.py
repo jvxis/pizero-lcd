@@ -19,8 +19,8 @@ response = requests.get(url)
 data = response.json()
 
 # Define fonts
-font_large = ImageFont.truetype("Font/NotoSans-Regular.ttf", size=24)
-font_small = ImageFont.truetype("Font/NotoSans-Regular.ttf", size=18)
+font_large = ImageFont.truetype("Font/ShareTech-Regular.ttf", size=24)
+font_small = ImageFont.truetype("Font/ShareTech-Regular.ttf", size=18)
 
 # Calculate node_alias width
 node_alias = data['node_alias']
@@ -37,14 +37,14 @@ def display_menu():
     draw = ImageDraw.Draw(image)
     
     # Display node_alias centered with background rectangle
-    draw.rectangle([(node_alias_x - 10, node_alias_y - 5), (node_alias_x + node_alias_width + 10, node_alias_y + 30)], fill="BLUE")
+    draw.rectangle([(node_alias_x - 10, node_alias_y - 5), (node_alias_x + node_alias_width + 10, node_alias_y + 30)], fill="ORANGE")
     draw.text((node_alias_x, node_alias_y), node_alias, font=font_large, fill="WHITE")
     
     # Display menu options with background rectangles
     menu_options = ['1. Bitcoin', '2. LND', '3. Exit']
     line_height = 40
     for i, option in enumerate(menu_options):
-        draw.rectangle([(10, 80 + i * line_height - 5), (230, 80 + i * line_height + 30)], fill="DARKGRAY")
+        draw.rectangle([(10, 80 + i * line_height - 5), (230, 80 + i * line_height + 30)], fill="DARKBLUE")
         draw.text((20, 80 + i * line_height), option, font=font_small, fill="WHITE")
     
     # Update display
