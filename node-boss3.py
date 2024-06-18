@@ -67,17 +67,20 @@ def display_info(title, info):
     # Display information
     y_position = 50
     for line in info.split('\n'):
-        label, value = line.split(':')
-        color = "WHITE"
-        if "Pruned" in label:
-            color = "LIGHTGREEN" if value.strip() == "True" else "RED" if value.strip() == "False" else "WHITE"
-        elif "Synced to Chain" in label:
-            color = "LIGHTGREEN" if value.strip() == "True" else "RED" if value.strip() == "False" else "WHITE"
-        elif "Synced to Graph" in label:
-            color = "LIGHTGREEN" if value.strip() == "True" else "RED" if value.strip() == "False" else "WHITE"
+        if ':' in line:
+            label, value = line.split(':')
+            color = "WHITE"
+            if "Pruned" in label:
+                color = "LIGHTGREEN" if value.strip() == "True" else "RED" if value.strip() == "False" else "WHITE"
+            elif "Synced to Chain" in label:
+                color = "LIGHTGREEN" if value.strip() == "True" else "RED" if value.strip() == "False" else "WHITE"
+            elif "Synced to Graph" in label:
+                color = "LIGHTGREEN" if value.strip() == "True" else "RED" if value.strip() == "False" else "WHITE"
         
-        draw.text((10, y_position), f"{label}:", font=font_small, fill="WHITE")
-        draw.text((150, y_position), value.strip(), font=font_small, fill=color)
+            draw.text((10, y_position), f"{label}:", font=font_small, fill="WHITE")
+            draw.text((150, y_position), value.strip(), font=font_small, fill=color)
+        else:
+            draw.text((10, y_position), line, font=font_small, fill="WHITE")
         y_position += 20
     
     # Update display
