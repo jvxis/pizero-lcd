@@ -67,8 +67,10 @@ def display_info(title, info):
     # Display information
     y_position = 50
     for line in info.split('\n'):
-        if ':' in line:
-            label, value = line.split(':')
+        parts = line.split(':', 1)  # Split into two parts, limit split to 1 time
+        if len(parts) == 2:
+            label, value = parts
+            value = value.strip()
             color = "WHITE"
             if "Pruned" in label:
                 color = "LIGHTGREEN" if value.strip() == "True" else "RED" if value.strip() == "False" else "WHITE"
