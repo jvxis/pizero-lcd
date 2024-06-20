@@ -195,9 +195,9 @@ def display_nerd_runner(initial_data):
         draw.text((140, 140), lnd_wallet_text, font=font_small, fill="BLUE")
         
         # Fee information
-        fastest_fee_text = f"Fast: {data['fastestFee']} sat/vB"
-        half_hour_fee_text = f"30m Fee: {data['halfHourFee']} sat/vB"
-        hour_fee_text = f"Hour Fee: {data['hourFee']} sat/vB"
+        fastest_fee_text = f"{data['fastestFee']} sat/vB | "
+        half_hour_fee_text = f"{data['halfHourFee']} sat/vB | "
+        hour_fee_text = f"{data['hourFee']} sat/vB"
         draw.rounded_rectangle([(10, 210), (230, 230)], radius=10, fill="YELLOW")
         draw.text((15, 212), fastest_fee_text, font=font_smaller, fill="BLACK")
         draw.text((100, 212), half_hour_fee_text, font=font_smaller, fill="BLACK")
