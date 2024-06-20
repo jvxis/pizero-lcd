@@ -183,5 +183,9 @@ while True:
             f"Fastest Fee: {data['fastestFee']} sat/vB",
             f"Half Hour Fee: {data['halfHourFee']} sat/vB",
             f"Hour Fee: {data['hourFee']} sat/vB",
-            f"Bitcoin Version: {data['subversion']}"
+            f"Bitcoin Version: {data['subversion']}",
+            f"LND Version: {data['node_lnd_version']}",
+            f"Total Channels: {data['number_of_channels']}",
+            f"$ Total: {data['total_balance']:.0f} sats",
+            f"Block Height: {data['current_block_height']}"
         ])
