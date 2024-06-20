@@ -23,7 +23,7 @@ data = response.json()
 # Define fonts
 font_large = ImageFont.truetype("Font/ShareTech-Regular.ttf", size=24)
 font_small = ImageFont.truetype("Font/ShareTech-Regular.ttf", size=18)
-font_bounce = ImageFont.truetype("Font/ShareTech-Regular.ttf", size=32)
+font_bounce = ImageFont.truetype("Font/ShareTech-Regular.ttf", size=30)
 
 # Calculate node_alias width
 node_alias = data['node_alias']
@@ -117,7 +117,10 @@ def get_lnd_info():
 
 def bounce_texts(texts):
     colors = ["BLUE", "RED", "GREEN", "YELLOW", "ORANGE", "WHITE", "GRAY"]
-    while disp.digital_read(disp.GPIO_KEY_PRESS_PIN) != 0:
+    while True:
+        if disp.digital_read(disp.GPIO_KEY3_PIN) != 0:
+            display_menu()
+            break
         for text in texts:
             # Create image buffer
             image = Image.new("RGB", (240, 240), "BLACK")
