@@ -23,7 +23,7 @@ data = response.json()
 # Define fonts
 font_large = ImageFont.truetype("Font/ShareTech-Regular.ttf", size=24)
 font_small = ImageFont.truetype("Font/ShareTech-Regular.ttf", size=18)
-font_bounce = ImageFont.truetype("Font/ShareTech-Regular.ttf", size=30)
+font_bounce = ImageFont.truetype("Font/ShareTech-Regular.ttf", size=32)
 
 # Calculate node_alias width
 node_alias = data['node_alias']
@@ -121,6 +121,7 @@ def bounce_texts(texts):
         if disp.digital_read(disp.GPIO_KEY3_PIN) != 0:
             display_menu()
             break
+        random.shuffle(texts)  # Shuffle texts to display in a random order
         for text in texts:
             # Create image buffer
             image = Image.new("RGB", (240, 240), "BLACK")
@@ -145,8 +146,13 @@ def bounce_texts(texts):
             # Update display
             disp.ShowImage(image)
             
-            # Wait for 2 seconds
-            time.sleep(2)
+            # Wait for 2 seconds or exit if key3 is pressed
+            start_time = time.time()
+            while time.time() - start_time < 2:
+                if disp.digital_read(disp.GPIO_KEY3_PIN) != 0:
+                    display_menu()
+                    return
+                time.sleep(0.1)
 
 display_menu()
 
@@ -177,8 +183,5 @@ while True:
             f"Fastest Fee: {data['fastestFee']} sat/vB",
             f"Half Hour Fee: {data['halfHourFee']} sat/vB",
             f"Hour Fee: {data['hourFee']} sat/vB",
-            f"Bitcoin Version: {data['subversion']}",
-            f"LND Version: {data['node_lnd_version']}",
-            f"Total Channels: {data['number_of_channels']}",
-            f"$ Total: {data['total_balance']:.0f} sats"
+            f"Bitcoin Version: {data['subversion']}"
         ])
