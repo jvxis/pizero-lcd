@@ -161,8 +161,17 @@ def bounce_texts(texts):
                 time.sleep(0.1)
 
 def display_nerd_runner(initial_data):
+    data = initial_data  # Use the initial data for the first display
+    last_fetch_time = time.time()  # Track the time of the last data fetch
+    
     while True:
-        data = initial_data
+        current_time = time.time()
+        
+        # Fetch new data if 15 minutes have passed since the last fetch
+        if current_time - last_fetch_time >= 15 * 60:
+            data = fetch_data()
+            last_fetch_time = current_time
+            
         image = Image.new("RGB", (240, 240), "BLACK")
         draw = ImageDraw.Draw(image)
         
@@ -175,7 +184,7 @@ def display_nerd_runner(initial_data):
         nerd_runner_bbox = font_nerd_runner.getbbox(nerd_runner_text)
         nerd_runner_width = nerd_runner_bbox[2] - nerd_runner_bbox[0]
         nerd_runner_x = (240 - nerd_runner_width) // 2
-        nerd_runner_y = 45
+        nerd_runner_y = 50
         draw.rounded_rectangle([(10, nerd_runner_y - 5), (230, nerd_runner_y + 30)], radius=10, fill="YELLOW")
         draw.text((nerd_runner_x, nerd_runner_y), nerd_runner_text, font=font_nerd_runner, fill="BLACK")
         
@@ -211,14 +220,14 @@ def display_nerd_runner(initial_data):
         # Update display
         disp.ShowImage(image)
         
-        start_time = time.time()
-        while time.time() - start_time < 15 * 60:  # 15 minutes
-            if disp.digital_read(disp.GPIO_KEY3_PIN) != 0:
-                display_menu()
-                return
-            time.sleep(1)
-        # Fetch new data after 15 minutes    
-        data = fetch_data()
+       # Check for button press to return to menu
+        if disp.digital_read(disp.GPIO_KEY3_PIN) != 0:
+            display_menu()
+            return
+        
+        # Delay for a short period before looping
+        time.sleep(1)
+        
 display_menu()
 
 while True:
