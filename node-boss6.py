@@ -160,9 +160,9 @@ def bounce_texts(texts):
                     return
                 time.sleep(0.1)
 
-def display_nerd_runner():
+def display_nerd_runner(initial_data):
     while True:
-        data = fetch_data()
+        data = initial_data
         image = Image.new("RGB", (240, 240), "BLACK")
         draw = ImageDraw.Draw(image)
         
@@ -176,27 +176,27 @@ def display_nerd_runner():
         nerd_runner_width = nerd_runner_bbox[2] - nerd_runner_bbox[0]
         nerd_runner_x = (240 - nerd_runner_width) // 2
         nerd_runner_y = 50
-        draw.rectangle([(nerd_runner_x - 10, nerd_runner_y - 5), (nerd_runner_x + nerd_runner_width + 10, nerd_runner_y + 30)], fill="YELLOW")
+        draw.rounded_rectangle([(nerd_runner_x - 10, nerd_runner_y - 5), (nerd_runner_x + nerd_runner_width + 10, nerd_runner_y + 30)], radius=10, fill="YELLOW")
         draw.text((nerd_runner_x, nerd_runner_y), nerd_runner_text, font=font_nerd_runner, fill="BLACK")
         
         # Bitcoin Core and Block Height
         bitcoin_text = f"Bitcoin Core \n{100 if data['sync_percentage'] > 99.99 else data['sync_percentage']:.2f}%"
         bitcoin_color = "LIGHTGREEN" if data['sync_percentage'] > 99.99 else "YELLOW"
-        block_height_text = f"Block Height \n{data['current_block_height']}"
+        block_height_text = f"\nBlock Height \n{data['current_block_height']}"
         draw.rounded_rectangle([(20, 100), (120, 200)], radius=10, fill="BLUE")
         draw.text((30, 110), bitcoin_text, font=font_small, fill=bitcoin_color)
         draw.text((30, 140), block_height_text, font=font_small, fill="ORANGE")
         
         # LND $ Total and Wallet
         lnd_total_text = f"LND $ Total \n{data['total_balance']:.0f} sats"
-        lnd_wallet_text = f"LND $ Wallet  \n{data['wallet_balance']:.0f} sats"
+        lnd_wallet_text = f"\nLND $ Wallet  \n{data['wallet_balance']:.0f} sats"
         draw.rounded_rectangle([(130, 100), (230, 200)], radius=10, fill="ORANGE")
         draw.text((140, 110), lnd_total_text, font=font_small, fill="BLUE")
         draw.text((140, 140), lnd_wallet_text, font=font_small, fill="BLUE")
         
         # Fee information
-        fastest_fee_text = f"Fastest Fee: {data['fastestFee']} sat/vB"
-        half_hour_fee_text = f"Half Hour Fee: {data['halfHourFee']} sat/vB"
+        fastest_fee_text = f"Fast: {data['fastestFee']} sat/vB"
+        half_hour_fee_text = f"30m Fee: {data['halfHourFee']} sat/vB"
         hour_fee_text = f"Hour Fee: {data['hourFee']} sat/vB"
         draw.rounded_rectangle([(10, 210), (230, 230)], radius=10, fill="YELLOW")
         draw.text((15, 212), fastest_fee_text, font=font_smaller, fill="BLACK")
@@ -212,7 +212,8 @@ def display_nerd_runner():
                 display_menu()
                 return
             time.sleep(1)
-        
+        # Fetch new data after 15 minutes    
+        data = fetch_data()
 display_menu()
 
 while True:
@@ -250,4 +251,4 @@ while True:
         ])
     elif disp.digital_read(disp.GPIO_KEY_UP_PIN) != 0:
         # Joystick up: Show NERD RUNNER screen
-        display_nerd_runner()
+        display_nerd_runner(data)
