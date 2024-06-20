@@ -27,8 +27,9 @@ data = fetch_data()
 # Define fonts
 font_large = ImageFont.truetype("Font/ShareTech-Regular.ttf", size=24)
 font_small = ImageFont.truetype("Font/ShareTech-Regular.ttf", size=18)
-font_bounce = ImageFont.truetype("Font/ShareTech-Regular.ttf", size=32)
+font_bounce = ImageFont.truetype("Font/ShareTech-Regular.ttf", size=30)
 font_nerd_runner = ImageFont.truetype("Font/ShareTech-Regular.ttf", size=32)
+font_smaller = ImageFont.truetype("Font/ShareTech-Regular.ttf", size=14)
 
 # Calculate node_alias width
 node_alias = data['node_alias']
@@ -179,28 +180,28 @@ def display_nerd_runner():
         draw.text((nerd_runner_x, nerd_runner_y), nerd_runner_text, font=font_nerd_runner, fill="BLACK")
         
         # Bitcoin Core and Block Height
-        bitcoin_text = f"Bitcoin Core - {100 if data['sync_percentage'] > 99.99 else data['sync_percentage']:.2f}%"
+        bitcoin_text = f"Bitcoin Core \n{100 if data['sync_percentage'] > 99.99 else data['sync_percentage']:.2f}%"
         bitcoin_color = "LIGHTGREEN" if data['sync_percentage'] > 99.99 else "YELLOW"
-        block_height_text = f"Block Height - {data['current_block_height']}"
+        block_height_text = f"Block Height \n{data['current_block_height']}"
         draw.rounded_rectangle([(20, 100), (120, 200)], radius=10, fill="BLUE")
         draw.text((30, 110), bitcoin_text, font=font_small, fill=bitcoin_color)
         draw.text((30, 140), block_height_text, font=font_small, fill="ORANGE")
         
         # LND $ Total and Wallet
-        lnd_total_text = f"LND $ Total: {data['total_balance']:.0f} sats"
-        lnd_wallet_text = f"LND $ Wallet: {data['wallet_balance']:.0f} sats"
+        lnd_total_text = f"LND $ Total \n{data['total_balance']:.0f} sats"
+        lnd_wallet_text = f"LND $ Wallet  \n{data['wallet_balance']:.0f} sats"
         draw.rounded_rectangle([(130, 100), (230, 200)], radius=10, fill="ORANGE")
-        draw.text((140, 110), lnd_total_text, font=font_small, fill="WHITE")
-        draw.text((140, 140), lnd_wallet_text, font=font_small, fill="WHITE")
+        draw.text((140, 110), lnd_total_text, font=font_small, fill="BLUE")
+        draw.text((140, 140), lnd_wallet_text, font=font_small, fill="BLUE")
         
         # Fee information
         fastest_fee_text = f"Fastest Fee: {data['fastestFee']} sat/vB"
         half_hour_fee_text = f"Half Hour Fee: {data['halfHourFee']} sat/vB"
         hour_fee_text = f"Hour Fee: {data['hourFee']} sat/vB"
         draw.rounded_rectangle([(10, 210), (230, 230)], radius=10, fill="YELLOW")
-        draw.text((15, 212), fastest_fee_text, font=font_small, fill="BLACK")
-        draw.text((115, 212), half_hour_fee_text, font=font_small, fill="BLACK")
-        draw.text((215, 212), hour_fee_text, font=font_small, fill="BLACK")
+        draw.text((15, 212), fastest_fee_text, font=font_smaller, fill="BLACK")
+        draw.text((115, 212), half_hour_fee_text, font=font_smaller, fill="BLACK")
+        draw.text((215, 212), hour_fee_text, font=font_smaller, fill="BLACK")
         
         # Update display
         disp.ShowImage(image)
