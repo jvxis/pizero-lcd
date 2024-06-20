@@ -195,13 +195,18 @@ def display_nerd_runner(initial_data):
         draw.text((140, 140), lnd_wallet_text, font=font_small, fill="BLUE")
         
         # Fee information
-        fastest_fee_text = f"{data['fastestFee']} sat/vB | "
-        half_hour_fee_text = f"{data['halfHourFee']} sat/vB | "
-        hour_fee_text = f"{data['hourFee']} sat/vB"
-        draw.rounded_rectangle([(10, 210), (230, 230)], radius=10, fill="YELLOW")
-        draw.text((15, 212), fastest_fee_text, font=font_smaller, fill="BLACK")
-        draw.text((100, 212), half_hour_fee_text, font=font_smaller, fill="BLACK")
-        draw.text((200, 212), hour_fee_text, font=font_smaller, fill="BLACK")
+        fee_text = f"{data['fastestFee']} sat/vB | {data['halfHourFee']} sat/vB | {data['hourFee']} sat/vB"
+        # Calculate the width of the text
+        fee_text_width = font_small.getbbox(fee_text)[2] - font_small.getbbox(fee_text)[0]
+        # Calculate the position to center the text
+        rect_left = 10
+        rect_right = 230
+        rect_width = rect_right - rect_left
+        text_x = rect_left + (rect_width - fee_text_width) // 2
+        # Draw the rectangle and the centered text
+        draw.rounded_rectangle([(rect_left, 210), (rect_right, 230)], radius=10, fill="YELLOW")
+        draw.text((text_x, 212), fee_text, font=font_small, fill="BLACK")
+
         
         # Update display
         disp.ShowImage(image)
