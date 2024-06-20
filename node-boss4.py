@@ -123,10 +123,17 @@ def bounce_texts(texts):
             image = Image.new("RGB", (240, 240), "BLACK")
             draw = ImageDraw.Draw(image)
             
-            # Draw the text at a random position
+            # Draw the text at a random position with a random color
             text_bbox = font_bounce.getbbox(text)
             text_width = text_bbox[2] - text_bbox[0]
             text_height = text_bbox[3] - text_bbox[1]
+            
+            # Ensure the text width and height are within the display bounds
+            if text_width > 240:
+                text_width = 240
+            if text_height > 240:
+                text_height = 240
+            
             x = random.randint(0, 240 - text_width)
             y = random.randint(0, 240 - text_height)
             color = random.choice(colors)
