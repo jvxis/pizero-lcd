@@ -200,8 +200,8 @@ def display_nerd_runner(initial_data):
         hour_fee_text = f"Hour Fee: {data['hourFee']} sat/vB"
         draw.rounded_rectangle([(10, 210), (230, 230)], radius=10, fill="YELLOW")
         draw.text((15, 212), fastest_fee_text, font=font_smaller, fill="BLACK")
-        draw.text((115, 212), half_hour_fee_text, font=font_smaller, fill="BLACK")
-        draw.text((215, 212), hour_fee_text, font=font_smaller, fill="BLACK")
+        draw.text((100, 212), half_hour_fee_text, font=font_smaller, fill="BLACK")
+        draw.text((200, 212), hour_fee_text, font=font_smaller, fill="BLACK")
         
         # Update display
         disp.ShowImage(image)
