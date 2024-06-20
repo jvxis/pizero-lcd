@@ -175,8 +175,8 @@ def display_nerd_runner(initial_data):
         nerd_runner_bbox = font_nerd_runner.getbbox(nerd_runner_text)
         nerd_runner_width = nerd_runner_bbox[2] - nerd_runner_bbox[0]
         nerd_runner_x = (240 - nerd_runner_width) // 2
-        nerd_runner_y = 50
-        draw.rounded_rectangle([(nerd_runner_x - 10, nerd_runner_y - 5), (nerd_runner_x + nerd_runner_width + 10, nerd_runner_y + 30)], radius=10, fill="YELLOW")
+        nerd_runner_y = 45
+        draw.rounded_rectangle([(10, nerd_runner_y - 5), (230, nerd_runner_y + 30)], radius=10, fill="YELLOW")
         draw.text((nerd_runner_x, nerd_runner_y), nerd_runner_text, font=font_nerd_runner, fill="BLACK")
         
         # Bitcoin Core and Block Height
@@ -197,7 +197,7 @@ def display_nerd_runner(initial_data):
         # Fee information
         fee_text = f"{data['fastestFee']} sat/vB | {data['halfHourFee']} sat/vB | {data['hourFee']} sat/vB"
         # Calculate the width of the text
-        fee_text_width = font_small.getbbox(fee_text)[2] - font_small.getbbox(fee_text)[0]
+        fee_text_width = font_smaller.getbbox(fee_text)[2] - font_smaller.getbbox(fee_text)[0]
         # Calculate the position to center the text
         rect_left = 10
         rect_right = 230
@@ -205,7 +205,7 @@ def display_nerd_runner(initial_data):
         text_x = rect_left + (rect_width - fee_text_width) // 2
         # Draw the rectangle and the centered text
         draw.rounded_rectangle([(rect_left, 210), (rect_right, 230)], radius=10, fill="YELLOW")
-        draw.text((text_x, 212), fee_text, font=font_small, fill="BLACK")
+        draw.text((text_x, 212), fee_text, font=font_smaller, fill="BLACK")
 
         
         # Update display
