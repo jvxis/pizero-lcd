@@ -163,8 +163,7 @@ def bounce_texts(texts):
 def display_nerd_runner(initial_data):
     data = initial_data  # Use the initial data for the first display
     last_fetch_time = time.time()  # Track the time of the last data fetch
-    image = Image.new("RGB", (240, 240), "BLACK")
-    draw = ImageDraw.Draw(image)
+
     while True:
         current_time = time.time()
         
@@ -172,10 +171,9 @@ def display_nerd_runner(initial_data):
         if current_time - last_fetch_time >= 15 * 60:
             data = fetch_data()
             last_fetch_time = current_time
-            image = Image.new("RGB", (240, 240), "BLACK")
-            draw = ImageDraw.Draw(image)
-        #image = Image.new("RGB", (240, 240), "BLACK")
-        #draw = ImageDraw.Draw(image)
+
+        image = Image.new("RGB", (240, 240), "BLACK")
+        draw = ImageDraw.Draw(image)
         
         # Current Date and Time
         current_time = datetime.now().strftime("%d/%m/%Y - %H:%M")
@@ -194,16 +192,16 @@ def display_nerd_runner(initial_data):
         bitcoin_text = f"Bitcoin Core \n{100 if data['sync_percentage'] > 99.99 else data['sync_percentage']:.2f}%"
         bitcoin_color = "LIGHTGREEN" if data['sync_percentage'] > 99.99 else "YELLOW"
         block_height_text = f"\nBlock Height \n{data['current_block_height']}"
-        draw.rounded_rectangle([(10, 100), (110, 200)], radius=10, fill="DARKBLUE")
-        draw.text((20, 110), bitcoin_text, font=font_small, fill=bitcoin_color)
-        draw.text((20, 140), block_height_text, font=font_small, fill="ORANGE")
+        draw.rounded_rectangle([(10, 90), (110, 190)], radius=10, fill="DARKBLUE")
+        draw.text((20, 100), bitcoin_text, font=font_small, fill=bitcoin_color)
+        draw.text((20, 130), block_height_text, font=font_small, fill="ORANGE")
         
         # LND $ Total and Wallet
         lnd_total_text = f"LND $ Total \n{data['total_balance']:.0f} sats"
         lnd_wallet_text = f"\nLND $ Wallet  \n{data['wallet_balance']:.0f} sats"
-        draw.rounded_rectangle([(130, 100), (230, 200)], radius=10, fill="ORANGE")
-        draw.text((140, 110), lnd_total_text, font=font_small, fill="BLUE")
-        draw.text((140, 140), lnd_wallet_text, font=font_small, fill="BLUE")
+        draw.rounded_rectangle([(130, 90), (230, 190)], radius=10, fill="ORANGE")
+        draw.text((140, 100), lnd_total_text, font=font_small, fill="BLUE")
+        draw.text((140, 130), lnd_wallet_text, font=font_small, fill="BLUE")
         
         # Fee information
         fee_text = f"{data['fastestFee']} sat/vB | {data['halfHourFee']} sat/vB | {data['hourFee']} sat/vB"
