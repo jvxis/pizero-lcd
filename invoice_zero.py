@@ -14,8 +14,10 @@ API_URL = "https://wallet.br-ln.com/api/v1/payments"
 API_KEY = "0efbe93958fc40a396effe783291a369"
 DEFAULT_AMOUNT_USD = 5
 DEFAULT_MEMO = "Pi Zero LCD Invoice"
-DEFAULT_EXPIRY_SECONDS = 900  # 15 minutes
+DEFAULT_EXPIRY_SECONDS = 300  # 5 minutes
 MEMPOOL_PRICE_URL = "https://mempool.space/api/v1/prices"
+PAYMENT_STATUS_URL = "https://wallet.br-ln.com/api/v1/payments"
+STATUS_POLL_INTERVAL = 3  # seconds
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
@@ -130,9 +132,44 @@ def render_invoice_fullscreen(payment_request: str) -> None:
     disp.ShowImage(canvas)
 
 
+def check_payment_status(payment_hash: str) -> bool:
+    """Return True if the invoice is paid."""
+    url = f"{PAYMENT_STATUS_URL}/{payment_hash}"
+    headers = {
+        "X-Api-Key": API_KEY,
+        "Content-type": "application/json",
+    }
+    response = requests.get(url, headers=headers, timeout=10)
+    response.raise_for_status()
+    data = response.json()
+    return bool(data.get("paid"))
+
+
+def monitor_invoice(payment_hash: str, expires_at: float) -> str:
+    """Poll payment status until paid or expired."""
+    while True:
+        now = time.time()
+        if now >= expires_at:
+            return "expired"
+        try:
+            if check_payment_status(payment_hash):
+                return "paid"
+        except Exception as exc:
+            logging.warning("Falha ao checar status: %s", exc)
+        time.sleep(STATUS_POLL_INTERVAL)
+
+
+def show_paid_screen() -> None:
+    show_message("Invoice paga", ["Pago! :D"], background="GREEN", text_color="BLACK")
+
+
+def show_expired_screen() -> None:
+    show_message("Invoice expirada", ["Nao paga.", "Press KEY1 nova", "KEY3 sair"], background="RED")
+
+
 def wait_for_exit() -> None:
-    """Keep the invoice visible until KEY3 is pressed or Ctrl+C."""
-    logging.info("Invoice exibida. Pressione KEY3 ou Ctrl+C para sair.")
+    """Wait for KEY3 or Ctrl+C then exit."""
+    logging.info("Pressione KEY3 ou Ctrl+C para sair.")
     try:
         while True:
             if disp.digital_read(disp.GPIO_KEY3_PIN) != 0:
@@ -140,6 +177,18 @@ def wait_for_exit() -> None:
             time.sleep(0.2)
     finally:
         disp.module_exit()
+
+
+def wait_for_retry_or_exit() -> bool:
+    """After expiration: KEY1 to retry, KEY3 to exit."""
+    logging.info("Invoice expirada. KEY1 nova, KEY3 sair.")
+    while True:
+        if disp.digital_read(disp.GPIO_KEY1_PIN) != 0:
+            return True
+        if disp.digital_read(disp.GPIO_KEY3_PIN) != 0:
+            disp.module_exit()
+            sys.exit(0)
+        time.sleep(0.2)
 
 
 def main() -> None:
@@ -156,39 +205,51 @@ def main() -> None:
     if len(sys.argv) > 2:
         memo = " ".join(sys.argv[2:])
 
-    try:
-        amount_sats, btc_price = usd_to_sats(amount)
-    except Exception as exc:
-        logging.exception("Nao foi possivel obter o preco BTC/USD")
-        show_message("Erro preco", [shorten(str(exc), width=32)], background="RED")
-        sys.exit(1)
+    while True:
+        try:
+            amount_sats, btc_price = usd_to_sats(amount)
+        except Exception as exc:
+            logging.exception("Nao foi possivel obter o preco BTC/USD")
+            show_message("Erro preco", [shorten(str(exc), width=32)], background="RED")
+            sys.exit(1)
 
-    show_message(
-        "Lightning",
-        [
-            "Gerando invoice",
-            f"{amount:.2f} USD ~ {amount_sats} sats",
-            f"BTC: ${btc_price:,.2f} (mempool.space)",
-            memo,
-        ],
-    )
+        show_message(
+            "Lightning",
+            [
+                "Gerando invoice",
+                f"{amount:.2f} USD ~ {amount_sats} sats",
+                f"BTC: ${btc_price:,.2f} (mempool.space)",
+                memo,
+            ],
+        )
 
-    try:
-        payment_request, payment_hash = create_invoice(amount_sats, memo, DEFAULT_EXPIRY_SECONDS)
-    except requests.HTTPError as exc:
-        detail = exc.response.text if exc.response is not None else str(exc)
-        logging.error("Erro da API: %s", detail)
-        show_message("Erro API", [shorten(detail, width=32)], background="RED")
-        sys.exit(1)
-    except Exception as exc:
-        logging.exception("Falha ao gerar invoice")
-        show_message("Erro", [str(exc)], background="RED")
-        sys.exit(1)
+        try:
+            payment_request, payment_hash = create_invoice(amount_sats, memo, DEFAULT_EXPIRY_SECONDS)
+        except requests.HTTPError as exc:
+            detail = exc.response.text if exc.response is not None else str(exc)
+            logging.error("Erro da API: %s", detail)
+            show_message("Erro API", [shorten(detail, width=32)], background="RED")
+            sys.exit(1)
+        except Exception as exc:
+            logging.exception("Falha ao gerar invoice")
+            show_message("Erro", [str(exc)], background="RED")
+            sys.exit(1)
 
-    show_invoice_info(amount, amount_sats, btc_price, memo)
-    render_invoice_fullscreen(payment_request)
-    logging.info("Invoice pronta: %s", payment_request)
-    wait_for_exit()
+        show_invoice_info(amount, amount_sats, btc_price, memo)
+        render_invoice_fullscreen(payment_request)
+        logging.info("Invoice pronta: %s", payment_request)
+
+        status = monitor_invoice(payment_hash or "", time.time() + DEFAULT_EXPIRY_SECONDS)
+        if status == "paid":
+            show_paid_screen()
+            wait_for_exit()
+            break
+        else:
+            show_expired_screen()
+            retry = wait_for_retry_or_exit()
+            if retry:
+                continue
+            break
 
 
 if __name__ == "__main__":
