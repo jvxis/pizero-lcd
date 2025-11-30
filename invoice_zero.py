@@ -15,7 +15,7 @@ API_KEY = "0efbe93958fc40a396effe783291a369"
 DEFAULT_AMOUNT_USD = 5
 DEFAULT_MEMO = "Pi Zero LCD Invoice"
 DEFAULT_EXPIRY_SECONDS = 900  # 15 minutes
-FIAT_PRICE_URL = "https://api.coindesk.com/v1/bpi/currentprice/USD.json"
+MEMPOOL_PRICE_URL = "https://mempool.space/api/v1/prices"
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
@@ -60,15 +60,15 @@ def show_message(title: str, lines: List[str], background: str = "BLACK", text_c
 
 
 def fetch_btc_price_usd() -> float:
-    """Fetch current BTC price in USD."""
-    response = requests.get(FIAT_PRICE_URL, timeout=10)
+    """Fetch current BTC price in USD from mempool.space."""
+    response = requests.get(MEMPOOL_PRICE_URL, timeout=10)
     response.raise_for_status()
     data = response.json()
-    return float(data["bpi"]["USD"]["rate_float"])
+    return float(data["USD"])
 
 
 def usd_to_sats(amount_usd: float) -> Tuple[int, float]:
-    """Convert USD amount to sats using a live price feed."""
+    """Convert USD amount to sats using live price from mempool.space."""
     price = fetch_btc_price_usd()
     sats = max(int((amount_usd / price) * 100_000_000), 1)
     return sats, price
@@ -178,7 +178,7 @@ def main() -> None:
         amount_sats, btc_price = usd_to_sats(amount)
     except Exception as exc:
         logging.exception("Nao foi possivel obter o preco BTC/USD")
-        show_message("Erro", [str(exc)], background="RED")
+        show_message("Erro preco", [shorten(str(exc), width=32)], background="RED")
         sys.exit(1)
 
     show_message(
@@ -186,7 +186,7 @@ def main() -> None:
         [
             "Gerando invoice",
             f"{amount:.2f} USD ~ {amount_sats} sats",
-            f"BTC: ${btc_price:,.2f}",
+            f"BTC: ${btc_price:,.2f} (mempool.space)",
             memo,
         ],
     )
