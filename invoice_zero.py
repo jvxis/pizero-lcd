@@ -95,57 +95,38 @@ def create_invoice(amount_sats: int, memo: str, expiry_seconds: int) -> Tuple[st
     return invoice["payment_request"], invoice.get("payment_hash")
 
 
-def render_invoice(
-    payment_request: str,
-    payment_hash: Optional[str],
-    amount_usd: float,
-    memo: str,
-    amount_sats: Optional[int],
-) -> None:
-    """Draw the QR code and supporting text on the LCD."""
+def show_invoice_info(amount_usd: float, amount_sats: int, btc_price: float, memo: str) -> None:
+    """Show amount and price info before the QR screen."""
+    lines = [
+        f"{amount_usd:.2f} USD",
+        f"~ {amount_sats} sats",
+        f"BTC: ${btc_price:,.2f}",
+    ]
+    if memo:
+        lines.append(shorten(memo, width=26, placeholder="..."))
+    show_message("Invoice pronta", lines, background="BLACK")
+    time.sleep(1.5)
+
+
+def render_invoice_fullscreen(payment_request: str) -> None:
+    """Draw only the QR code, filling the 240x240 display."""
     qr = qrcode.QRCode(
         error_correction=qrcode.constants.ERROR_CORRECT_Q,
-        box_size=3,
-        border=2,
+        box_size=10,
+        border=1,
     )
     qr.add_data(payment_request)
     qr.make(fit=True)
     qr_img = qr.make_image(fill_color="black", back_color="white").convert("RGB")
+    base_size = qr_img.size[0]
+    scale = max(1, 240 // base_size)
+    target_size = base_size * scale
+    qr_img = qr_img.resize((target_size, target_size), Image.NEAREST)
 
-    qr_size = 150
-    qr_img = qr_img.resize((qr_size, qr_size), Image.NEAREST)
-
-    image = Image.new("RGB", (240, 240), "WHITE")
-    draw = ImageDraw.Draw(image)
-
-    # Header with amount
-    header_text = f"{amount_usd:.2f} USD"
-    header_width = font_title.getbbox(header_text)[2] - font_title.getbbox(header_text)[0]
-    draw.rectangle([(0, 0), (239, 64)], fill="BLACK")
-    draw.text(((240 - header_width) // 2, 8), header_text, font=font_title, fill="WHITE")
-    if amount_sats is not None:
-        sats_text = f"~ {amount_sats} sats"
-        draw.text((10, 32), sats_text, font=font_small, fill="WHITE")
-
-    # Memo just under the header
-    if memo:
-        memo_text = shorten(memo, width=26, placeholder="...")
-        draw.text((12, 48), memo_text, font=font_small, fill="WHITE")
-
-    # Center the QR code
-    qr_x = (240 - qr_size) // 2
-    qr_y = 70
-    image.paste(qr_img, (qr_x, qr_y))
-
-    # Footer with abbreviated invoice info
-    short_invoice = f"{payment_request[:12]}...{payment_request[-12:]}"
-    draw.rectangle([(0, 220), (239, 239)], fill="BLACK")
-    draw.text((10, 222), short_invoice, font=font_small, fill="WHITE")
-    if payment_hash:
-        hash_text = f"hash: {payment_hash[:12]}..."
-        draw.text((10, 206), hash_text, font=font_small, fill="BLACK")
-
-    disp.ShowImage(image)
+    canvas = Image.new("RGB", (240, 240), "WHITE")
+    offset = ((240 - target_size) // 2, (240 - target_size) // 2)
+    canvas.paste(qr_img, offset)
+    disp.ShowImage(canvas)
 
 
 def wait_for_exit() -> None:
@@ -203,7 +184,8 @@ def main() -> None:
         show_message("Erro", [str(exc)], background="RED")
         sys.exit(1)
 
-    render_invoice(payment_request, payment_hash, amount, memo, amount_sats)
+    show_invoice_info(amount, amount_sats, btc_price, memo)
+    render_invoice_fullscreen(payment_request)
     logging.info("Invoice pronta: %s", payment_request)
     wait_for_exit()
 
