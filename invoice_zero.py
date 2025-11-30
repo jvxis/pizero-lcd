@@ -111,15 +111,16 @@ def show_invoice_info(amount_usd: float, amount_sats: int, btc_price: float, mem
 def render_invoice_fullscreen(payment_request: str) -> None:
     """Draw only the QR code, filling the 240x240 display."""
     qr = qrcode.QRCode(
-        error_correction=qrcode.constants.ERROR_CORRECT_Q,
-        box_size=10,
-        border=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_M,
+        box_size=1,
+        border=4,
     )
     qr.add_data(payment_request)
     qr.make(fit=True)
     qr_img = qr.make_image(fill_color="black", back_color="white").convert("RGB")
     base_size = qr_img.size[0]
-    scale = max(1, 240 // base_size)
+    available = 220  # leave a small white margin around
+    scale = max(1, available // base_size)
     target_size = base_size * scale
     qr_img = qr_img.resize((target_size, target_size), Image.NEAREST)
 
