@@ -15,7 +15,7 @@ API_KEY = "0efbe93958fc40a396effe783291a369"
 DEFAULT_AMOUNT_USD = 5
 DEFAULT_MEMO = "Pi Zero LCD Invoice"
 DEFAULT_EXPIRY_SECONDS = 900  # 15 minutes
-DEFAULT_UNIT = "usd"
+FIAT_PRICE_URL = "https://api.coindesk.com/v1/bpi/currentprice/USD.json"
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
@@ -59,28 +59,49 @@ def show_message(title: str, lines: List[str], background: str = "BLACK", text_c
     disp.ShowImage(image)
 
 
-def create_invoice(amount_usd: float, memo: str, expiry_seconds: int) -> Tuple[str, Optional[str]]:
+def fetch_btc_price_usd() -> float:
+    """Fetch current BTC price in USD."""
+    response = requests.get(FIAT_PRICE_URL, timeout=10)
+    response.raise_for_status()
+    data = response.json()
+    return float(data["bpi"]["USD"]["rate_float"])
+
+
+def usd_to_sats(amount_usd: float) -> Tuple[int, float]:
+    """Convert USD amount to sats using a live price feed."""
+    price = fetch_btc_price_usd()
+    sats = max(int((amount_usd / price) * 100_000_000), 1)
+    return sats, price
+
+
+def create_invoice(amount_sats: int, memo: str, expiry_seconds: int) -> Tuple[str, Optional[str]]:
     """Call the wallet API to create a Lightning invoice."""
     payload = {
         "out": False,
-        "amount": int(amount_usd),
+        "amount": int(amount_sats),
         "memo": memo,
         "expiry": int(expiry_seconds),
-        "unit": DEFAULT_UNIT,
+        "unit": "sat",
     }
     headers = {
         "X-Api-Key": API_KEY,
         "Content-type": "application/json",
     }
 
-    logging.info("Solicitando invoice: %.2f %s (memo: %s)", amount_usd, DEFAULT_UNIT, memo)
+    logging.info("Solicitando invoice: %s sats (memo: %s)", amount_sats, memo)
     response = requests.post(API_URL, json=payload, headers=headers, timeout=20)
     response.raise_for_status()
     invoice = response.json()
     return invoice["payment_request"], invoice.get("payment_hash")
 
 
-def render_invoice(payment_request: str, payment_hash: Optional[str], amount_usd: float, memo: str) -> None:
+def render_invoice(
+    payment_request: str,
+    payment_hash: Optional[str],
+    amount_usd: float,
+    memo: str,
+    amount_sats: Optional[int],
+) -> None:
     """Draw the QR code and supporting text on the LCD."""
     qr = qrcode.QRCode(
         error_correction=qrcode.constants.ERROR_CORRECT_Q,
@@ -91,26 +112,29 @@ def render_invoice(payment_request: str, payment_hash: Optional[str], amount_usd
     qr.make(fit=True)
     qr_img = qr.make_image(fill_color="black", back_color="white").convert("RGB")
 
-    qr_size = 200
+    qr_size = 150
     qr_img = qr_img.resize((qr_size, qr_size), Image.NEAREST)
 
     image = Image.new("RGB", (240, 240), "WHITE")
     draw = ImageDraw.Draw(image)
 
     # Header with amount
-    header_text = f"{amount_usd:.2f} USD Lightning"
+    header_text = f"{amount_usd:.2f} USD"
     header_width = font_title.getbbox(header_text)[2] - font_title.getbbox(header_text)[0]
-    draw.rectangle([(0, 0), (239, 52)], fill="BLACK")
-    draw.text(((240 - header_width) // 2, 14), header_text, font=font_title, fill="WHITE")
+    draw.rectangle([(0, 0), (239, 64)], fill="BLACK")
+    draw.text(((240 - header_width) // 2, 8), header_text, font=font_title, fill="WHITE")
+    if amount_sats is not None:
+        sats_text = f"~ {amount_sats} sats"
+        draw.text((10, 32), sats_text, font=font_small, fill="WHITE")
 
     # Memo just under the header
     if memo:
         memo_text = shorten(memo, width=26, placeholder="...")
-        draw.text((12, 56), memo_text, font=font_body, fill="BLACK")
+        draw.text((12, 48), memo_text, font=font_small, fill="WHITE")
 
     # Center the QR code
     qr_x = (240 - qr_size) // 2
-    qr_y = 76
+    qr_y = 70
     image.paste(qr_img, (qr_x, qr_y))
 
     # Footer with abbreviated invoice info
@@ -150,16 +174,36 @@ def main() -> None:
     if len(sys.argv) > 2:
         memo = " ".join(sys.argv[2:])
 
-    show_message("Lightning", [f"Gerando invoice", f"{amount:.2f} USD", memo])
+    try:
+        amount_sats, btc_price = usd_to_sats(amount)
+    except Exception as exc:
+        logging.exception("Nao foi possivel obter o preco BTC/USD")
+        show_message("Erro", [str(exc)], background="RED")
+        sys.exit(1)
+
+    show_message(
+        "Lightning",
+        [
+            "Gerando invoice",
+            f"{amount:.2f} USD ~ {amount_sats} sats",
+            f"BTC: ${btc_price:,.2f}",
+            memo,
+        ],
+    )
 
     try:
-        payment_request, payment_hash = create_invoice(amount, memo, DEFAULT_EXPIRY_SECONDS)
+        payment_request, payment_hash = create_invoice(amount_sats, memo, DEFAULT_EXPIRY_SECONDS)
+    except requests.HTTPError as exc:
+        detail = exc.response.text if exc.response is not None else str(exc)
+        logging.error("Erro da API: %s", detail)
+        show_message("Erro API", [shorten(detail, width=32)], background="RED")
+        sys.exit(1)
     except Exception as exc:
         logging.exception("Falha ao gerar invoice")
         show_message("Erro", [str(exc)], background="RED")
         sys.exit(1)
 
-    render_invoice(payment_request, payment_hash, amount, memo)
+    render_invoice(payment_request, payment_hash, amount, memo, amount_sats)
     logging.info("Invoice pronta: %s", payment_request)
     wait_for_exit()
 
